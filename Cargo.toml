@@ -11,7 +11,5 @@ publish = false
 
 [dependencies]
 getopt = "1.0"
-lazy_static = "1"
 program = { git = "https://git.dragonma.us/dragonmaus/program.rs", version = "1.0" }
 rand = "0.7"
-regex = "1"

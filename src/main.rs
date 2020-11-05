@@ -1,6 +1,5 @@
 use getopt::Opt;
 use rand::random;
-use regex::Regex;
 use std::{
     error::Error,
     fs::{self, File},
@@ -130,10 +129,8 @@ fn zero_shred(mut file: &File, size: u64) -> program::Result {
 }
 
 fn erase(path: &str) -> program::Result {
-    let re = Regex::new(".")?;
-
     let (dir, mut oldname) = split_path(&path)?;
-    let mut newname = re.replace_all(&oldname, "0").into_owned();
+    let mut newname = String::from_utf8(oldname.as_bytes().iter().map(|_| b'0').collect())?;
 
     if newname != oldname {
         rename(&dir, &oldname, &newname)?;
