@@ -101,7 +101,7 @@ fn random_shred(mut file: &File, size: u64) -> program::Result {
             remaining = 0;
         } else {
             file.write_all(&buffer)?;
-            remaining = remaining - 1024;
+            remaining -= 1024;
         }
     }
     file.sync_data()?;
@@ -121,7 +121,7 @@ fn zero_shred(mut file: &File, size: u64) -> program::Result {
             remaining = 0;
         } else {
             file.write_all(&buffer)?;
-            remaining = remaining - 1024;
+            remaining -= 1024;
         }
     }
     file.sync_data()?;
