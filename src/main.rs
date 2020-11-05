@@ -1,0 +1,193 @@
+use getopt::Opt;
+use rand::random;
+use regex::Regex;
+use std::{
+    error::Error,
+    fs::{self, File},
+    io::{self, Seek, SeekFrom, Write},
+    path::Path,
+};
+
+program::main!("purge");
+
+fn usage_line() -> String {
+    format!("Usage: {} [-h] path [path ...]", program::name("purge"))
+}
+
+fn print_usage() -> program::Result {
+    println!("{}", usage_line());
+    println!("  -h   display this help");
+    Ok(0)
+}
+
+fn log(msg: &str) {
+    eprintln!("{}: {}", program::name("purge"), msg)
+}
+
+fn program() -> program::Result {
+    let mut args = program::args();
+    let mut opts = getopt::Parser::new(&args, "h");
+
+    loop {
+        match opts.next().transpose()? {
+            None => break,
+            Some(opt) => match opt {
+                Opt('h', None) => return print_usage(),
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    let args = args.split_off(opts.index());
+    if args.is_empty() {
+        eprintln!("{}", usage_line());
+        return Ok(1);
+    }
+
+    for arg in args {
+        purge(&arg)?;
+    }
+
+    Ok(0)
+}
+
+fn purge(path: &str) -> program::Result {
+    let attrs = fs::symlink_metadata(path)?;
+
+    let mut perms = attrs.permissions();
+    perms.set_readonly(false);
+    fs::set_permissions(path, perms)?;
+
+    if attrs.is_dir() {
+        for entry in fs::read_dir(path)? {
+            let entry = entry?;
+            purge(&entry.path().to_string_lossy())?;
+        }
+        erase(path)?;
+    } else {
+        shred(path)?;
+        erase(path)?;
+    }
+
+    Ok(0)
+}
+
+fn shred(path: &str) -> program::Result {
+    let size = fs::metadata(&path)?.len();
+    let file = fs::OpenOptions::new().write(true).open(path)?;
+
+    for pass in 1..=3 {
+        log(&format!("{}: pass {}/4 (random)...", path, pass));
+        random_shred(&file, size)?;
+    }
+
+    log(&format!("{}: pass 4/4 (000000)...", path));
+    zero_shred(&file, size)?;
+
+    Ok(0)
+}
+
+fn random_shred(mut file: &File, size: u64) -> program::Result {
+    let r = random::<u8>();
+
+    let mut remaining = size as usize;
+    let buffer = [r; 1024];
+
+    file.seek(SeekFrom::Start(0))?;
+    while remaining > 0 {
+        if remaining < 1024 {
+            let buffer = vec![r; remaining];
+            file.write_all(&buffer)?;
+            remaining = 0;
+        } else {
+            file.write_all(&buffer)?;
+            remaining = remaining - 1024;
+        }
+    }
+    file.sync_data()?;
+
+    Ok(0)
+}
+
+fn zero_shred(mut file: &File, size: u64) -> program::Result {
+    let mut remaining = size as usize;
+    let buffer = [0u8; 1024];
+
+    file.seek(SeekFrom::Start(0))?;
+    while remaining > 0 {
+        if remaining < 1024 {
+            let buffer = vec![0u8; remaining];
+            file.write_all(&buffer)?;
+            remaining = 0;
+        } else {
+            file.write_all(&buffer)?;
+            remaining = remaining - 1024;
+        }
+    }
+    file.sync_data()?;
+
+    Ok(0)
+}
+
+fn erase(path: &str) -> program::Result {
+    let re = Regex::new(".")?;
+
+    let (dir, mut oldname) = split_path(&path)?;
+    let mut newname = re.replace_all(&oldname, "0").into_owned();
+
+    if newname != oldname {
+        rename(&dir, &oldname, &newname)?;
+    }
+
+    while newname != "0" {
+        oldname = newname;
+        newname = oldname.strip_suffix("0").unwrap().to_string();
+
+        rename(&dir, &oldname, &newname)?;
+    }
+
+    let newpath = join_path(&dir, &newname)?;
+    if fs::metadata(&newpath)?.is_dir() {
+        fs::remove_dir(newpath)?;
+    } else {
+        fs::remove_file(newpath)?;
+    }
+
+    log(&format!("{}: removed", path));
+
+    Ok(0)
+}
+
+fn rename(dir: &Option<String>, from: &str, to: &str) -> program::Result {
+    let from = join_path(&dir, &from)?;
+    let to = join_path(&dir, &to)?;
+
+    fs::rename(&from, &to)?;
+
+    log(&format!("{}: renamed to {}", from, to));
+
+    Ok(0)
+}
+
+fn split_path(path: &str) -> Result<(Option<String>, String), Box<dyn Error>> {
+    let path = Path::new(path);
+    let head = path.parent().map(|p| p.to_string_lossy().into_owned());
+    let tail = match path.file_name() {
+        None => {
+            return Err(Box::new(io::Error::new(
+                io::ErrorKind::Other,
+                format!("bad path: '{}'", path.display()),
+            )))
+        }
+        Some(p) => p.to_string_lossy().into_owned(),
+    };
+
+    Ok((head, tail))
+}
+
+fn join_path(dir: &Option<String>, name: &str) -> Result<String, Box<dyn Error>> {
+    Ok(match dir {
+        None => name.to_string(),
+        Some(p) => Path::new(p).join(name).to_string_lossy().into_owned(),
+    })
+}
