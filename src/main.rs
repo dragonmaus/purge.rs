@@ -74,7 +74,7 @@ fn purge(path: &str) -> program::Result {
 }
 
 fn shred(path: &str) -> program::Result {
-    let size = fs::metadata(&path)?.len();
+    let size = fs::symlink_metadata(&path)?.len();
     let file = fs::OpenOptions::new().write(true).open(path)?;
 
     for pass in 1..=3 {
@@ -126,7 +126,7 @@ fn erase(path: &str) -> program::Result {
     }
 
     let newpath = join_path(&dir, &newname)?;
-    if fs::metadata(&newpath)?.is_dir() {
+    if fs::symlink_metadata(&newpath)?.is_dir() {
         fs::remove_dir(newpath)?;
     } else {
         fs::remove_file(newpath)?;
