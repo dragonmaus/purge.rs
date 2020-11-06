@@ -64,11 +64,11 @@ fn purge(path: &str) -> program::Result {
             let entry = entry?;
             purge(&entry.path().to_string_lossy())?;
         }
-        erase(path)?;
-    } else {
+    } else if attrs.is_file() {
         shred(path)?;
-        erase(path)?;
     }
+
+    erase(path)?;
 
     Ok(0)
 }
