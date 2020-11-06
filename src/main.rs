@@ -7,6 +7,8 @@ use std::{
     path::Path,
 };
 
+const SHRED_BUFFER_MAX: usize = 262_144;
+
 program::main!("purge");
 
 fn usage_line() -> String {
@@ -76,53 +78,33 @@ fn shred(path: &str) -> program::Result {
     let file = fs::OpenOptions::new().write(true).open(path)?;
 
     for pass in 1..=3 {
+        let r = random::<u8>();
         log(&format!("{}: pass {}/4 (random)...", path, pass));
-        random_shred(&file, size)?;
+        shred_with(r, &file, size)?;
     }
 
     log(&format!("{}: pass 4/4 (000000)...", path));
-    zero_shred(&file, size)?;
+    shred_with(0, &file, size)?;
 
     Ok(0)
 }
 
-fn random_shred(mut file: &File, size: u64) -> program::Result {
-    let r = random::<u8>();
-
+fn shred_with(byte: u8, mut file: &File, size: u64) -> program::Result {
     let mut remaining = size as usize;
-    let buffer = [r; 1024];
 
     file.seek(SeekFrom::Start(0))?;
-    while remaining > 0 {
-        if remaining < 1024 {
-            let buffer = vec![r; remaining];
-            file.write_all(&buffer)?;
-            remaining = 0;
-        } else {
-            file.write_all(&buffer)?;
-            remaining -= 1024;
-        }
+
+    while remaining >= SHRED_BUFFER_MAX {
+        let buffer = [byte; SHRED_BUFFER_MAX];
+        file.write_all(&buffer)?;
+        remaining -= SHRED_BUFFER_MAX;
     }
-    file.sync_data()?;
 
-    Ok(0)
-}
-
-fn zero_shred(mut file: &File, size: u64) -> program::Result {
-    let mut remaining = size as usize;
-    let buffer = [0u8; 1024];
-
-    file.seek(SeekFrom::Start(0))?;
-    while remaining > 0 {
-        if remaining < 1024 {
-            let buffer = vec![0u8; remaining];
-            file.write_all(&buffer)?;
-            remaining = 0;
-        } else {
-            file.write_all(&buffer)?;
-            remaining -= 1024;
-        }
+    if remaining > 0 {
+        let buffer = vec![byte; remaining];
+        file.write_all(&buffer)?;
     }
+
     file.sync_data()?;
 
     Ok(0)
