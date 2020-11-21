@@ -53,22 +53,22 @@ fn program() -> program::Result {
 }
 
 fn purge(path: &str) -> program::Result {
-    let attrs = fs::symlink_metadata(path)?;
+    let attrs = fs::symlink_metadata(path).map_err(|e| format!("'{}': {}", path, e))?;
 
     let mut perms = attrs.permissions();
     perms.set_readonly(false);
-    fs::set_permissions(path, perms)?;
+    fs::set_permissions(path, perms).map_err(|e| format!("'{}': {}", path, e))?;
 
     if attrs.is_dir() {
-        for entry in fs::read_dir(path)? {
-            let entry = entry?;
+        for entry in fs::read_dir(path).map_err(|e| format!("'{}': {}", path, e))? {
+            let entry = entry.map_err(|e| format!("'{}': {}", path, e))?;
             purge(&entry.path().to_string_lossy())?;
         }
     } else if attrs.is_file() {
-        shred(path)?;
+        shred(path).map_err(|e| format!("'{}': {}", path, e))?;
     }
 
-    erase(path)?;
+    erase(path).map_err(|e| format!("'{}': {}", path, e))?;
 
     Ok(0)
 }

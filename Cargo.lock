@@ -8,9 +8,9 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 
 [[package]]
 name = "getopt"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b5592be23d6f8a6cbc0c7be22ef7e51a72f073192ceca11ee4fa61602b52140"
+checksum = "09967f2490f1eadf673ed7beb29a98948e04dee3f117c104121507d8336ec302"
 
 [[package]]
 name = "getrandom"
@@ -37,12 +37,12 @@ checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 
 [[package]]
 name = "program"
-version = "1.0.0"
-source = "git+https://git.dragonma.us/dragonmaus/program.rs#0033aaf61c2276290e8e7174dfb2f36e7ae3f133"
+version = "1.1.0"
+source = "git+https://git.dragonma.us/dragonmaus/program.rs#0b209ce9062e38d1b50191259394cab83619cd3b"
 
 [[package]]
 name = "purge"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "getopt",
  "program",
