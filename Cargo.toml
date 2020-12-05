@@ -10,6 +10,6 @@ categories = ["command-line-utilities"]
 publish = false
 
 [dependencies]
-getopt = "1.0"
-program = { git = "https://git.dragonma.us/dragonmaus/program.rs", version = "1.0" }
+getopt = "1"
+program = { git = "https://git.dragonma.us/dragonmaus/program.rs", version = "1" }
 rand = "0.7"
