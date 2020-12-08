@@ -1,6 +1,6 @@
 [package]
 name = "purge"
-version = "1.0.4"
+version = "1.0.5"
 authors = ["David Wildasin <dragonmaus@posteo.net>"]
 edition = "2018"
 description = "Recursively shred files and directories"
@@ -10,6 +10,7 @@ categories = ["command-line-utilities"]
 publish = false
 
 [dependencies]
+cfg-if = "1"
 getopt = "1"
 program = { git = "https://git.dragonma.us/dragonmaus/program.rs", version = "1" }
 rand = "0.7"

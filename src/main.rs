@@ -2,10 +2,30 @@ use getopt::Opt;
 use rand::random;
 use std::{
     error::Error,
-    fs::{self, File},
+    fs::{self, File, Metadata},
     io::{self, Seek, SeekFrom, Write},
     path::Path,
 };
+
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "linux")] {
+        use std::os::linux::fs::MetadataExt;
+
+        fn hardlinks(meta: &Metadata) -> u64 {
+            meta.st_nlink()
+        }
+    } else if #[cfg(unix)] {
+        use std::os::unix::fs::MetadataExt;
+
+        fn hardlinks(meta: &Metadata) -> u64 {
+            meta.nlink()
+        }
+    } else {
+        fn hardlinks(_meta: &Metadata) -> u64 {
+            1
+        }
+    }
+}
 
 const SHRED_BUFFER_MAX: usize = 262_144;
 
@@ -64,7 +84,7 @@ fn purge(path: &str) -> program::Result {
             let entry = entry.map_err(|e| format!("'{}': {}", path, e))?;
             purge(&entry.path().to_string_lossy())?;
         }
-    } else if attrs.is_file() {
+    } else if attrs.is_file() && hardlinks(&attrs) == 1 {
         shred(path).map_err(|e| format!("'{}': {}", path, e))?;
     }
 
