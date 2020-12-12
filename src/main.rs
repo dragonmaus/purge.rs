@@ -76,8 +76,10 @@ fn purge(path: &str) -> program::Result {
     let attrs = fs::symlink_metadata(path).map_err(|e| format!("'{}': {}", path, e))?;
 
     let mut perms = attrs.permissions();
-    perms.set_readonly(false);
-    fs::set_permissions(path, perms).map_err(|e| format!("'{}': {}", path, e))?;
+    if perms.readonly() {
+        perms.set_readonly(false);
+        fs::set_permissions(path, perms).map_err(|e| format!("'{}': {}", path, e))?;
+    }
 
     if attrs.is_dir() {
         for entry in fs::read_dir(path).map_err(|e| format!("'{}': {}", path, e))? {

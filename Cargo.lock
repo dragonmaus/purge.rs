@@ -48,7 +48,7 @@ source = "git+https://git.dragonma.us/dragonmaus/program.rs#0b209ce9062e38d1b501
 
 [[package]]
 name = "purge"
-version = "1.0.5"
+version = "1.0.6"
 dependencies = [
  "cfg-if 1.0.0",
  "getopt",
