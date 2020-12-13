@@ -22,7 +22,7 @@ fn program() -> program::Result {
                 Opt('h', None) => {
                     print_usage();
                     return Ok(0);
-                },
+                }
                 _ => unreachable!(),
             },
         }
