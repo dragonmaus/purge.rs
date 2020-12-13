@@ -1,4 +1,8 @@
-use std::{error::Error, io, path::Path};
+use std::{error::Error, fs, io, path::Path};
+
+pub fn exists(path: &str) -> bool {
+    fs::metadata(path).is_ok()
+}
 
 pub fn join(dir: &Option<String>, name: &str) -> Result<String, Box<dyn Error>> {
     Ok(match dir {

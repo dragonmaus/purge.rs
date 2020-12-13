@@ -3,7 +3,11 @@
 mod file;
 mod path;
 
-use std::fs::{self, Metadata};
+use std::{
+    cmp::Ordering,
+    fs::{self, DirEntry, Metadata},
+    io,
+};
 
 cfg_if::cfg_if! {
     if #[cfg(windows_by_handle)] {
@@ -44,7 +48,33 @@ pub fn purge(path: &str) -> program::Result {
     }
 
     if attrs.is_dir() {
-        for entry in fs::read_dir(path).map_err(|e| format!("'{}': {}", path, e))? {
+        let mut entries = fs::read_dir(path)
+            .map_err(|e| format!("'{}': {}", path, e))?
+            .collect::<Vec<io::Result<DirEntry>>>();
+
+        entries.sort_by(|a, b| {
+            if a.is_err() || b.is_err() {
+                return Ordering::Equal;
+            }
+
+            let na = a.as_ref().unwrap().file_name();
+            let nb = b.as_ref().unwrap().file_name();
+
+            let za = na.to_string_lossy().chars().all(|c| c == '0');
+            let zb = nb.to_string_lossy().chars().all(|c| c == '0');
+
+            if za && !zb {
+                return Ordering::Less;
+            }
+
+            if zb && !za {
+                return Ordering::Greater;
+            }
+
+            na.cmp(&nb)
+        });
+
+        for entry in entries {
             let entry = entry.map_err(|e| format!("'{}': {}", path, e))?;
             purge(&entry.path().to_string_lossy())?;
         }

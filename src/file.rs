@@ -2,7 +2,7 @@ use crate::path;
 use rand::random;
 use std::{
     fs::{self, File},
-    io::{Seek, SeekFrom, Write},
+    io::{self, Seek, SeekFrom, Write},
 };
 
 const SHRED_BUFFER_MAX: usize = 262_144;
@@ -57,6 +57,13 @@ fn log(msg: &str) {
 fn rename(dir: &Option<String>, from: &str, to: &str) -> program::Result {
     let from = path::join(&dir, &from)?;
     let to = path::join(&dir, &to)?;
+
+    if path::exists(&to) {
+        return Err(Box::new(io::Error::new(
+            io::ErrorKind::Other,
+            format!("file exists: {}", to),
+        )));
+    }
 
     fs::rename(&from, &to)?;
 
