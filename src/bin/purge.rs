@@ -6,10 +6,9 @@ fn usage_line() -> String {
     format!("Usage: {} [-h] path [path ...]", program::name("purge"))
 }
 
-fn print_usage() -> program::Result {
+fn print_usage() {
     println!("{}", usage_line());
     println!("  -h   display this help");
-    Ok(0)
 }
 
 fn program() -> program::Result {
@@ -20,7 +19,10 @@ fn program() -> program::Result {
         match opts.next().transpose()? {
             None => break,
             Some(opt) => match opt {
-                Opt('h', None) => return print_usage(),
+                Opt('h', None) => {
+                    print_usage();
+                    return Ok(0);
+                },
                 _ => unreachable!(),
             },
         }
