@@ -1,6 +1,6 @@
 [package]
 name = "purge"
-version = "1.0.6"
+version = "1.0.7"
 authors = ["David Wildasin <dragonmaus@posteo.net>"]
 edition = "2018"
 description = "Recursively shred files and directories"
@@ -14,3 +14,6 @@ cfg-if = "1"
 getopt = "1"
 program = { git = "https://git.dragonma.us/dragonmaus/program.rs", version = "1" }
 rand = "0.7"
+
+[features]
+windows_by_handle = []

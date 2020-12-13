@@ -1,10 +1,21 @@
+#![cfg_attr(windows_by_handle, feature(windows_by_handle))]
+
 mod file;
 mod path;
 
 use std::fs::{self, Metadata};
 
 cfg_if::cfg_if! {
-    if #[cfg(target_os = "linux")] {
+    if #[cfg(windows_by_handle)] {
+        use std::os::windows::fs::MetadataExt;
+
+        fn hardlinks(meta: &Metadata) -> u64 {
+            match meta.number_of_links() {
+                None => 1,
+                Some(n) => n as u64,
+            }
+        }
+    } else if #[cfg(target_os = "linux")] {
         use std::os::linux::fs::MetadataExt;
 
         fn hardlinks(meta: &Metadata) -> u64 {
