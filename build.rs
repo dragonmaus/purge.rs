@@ -24,7 +24,7 @@ fn enable_windows_by_handle(version: Version) -> bool {
                 major: 1,
                 minor: 38,
                 patch: 0,
-                nightly: false,
+                nightly: true,
                 commit: "".to_string(),
                 date: Date {
                     year: 2019,
@@ -85,17 +85,26 @@ impl Version {
 
     fn parse(s: &str) -> Result<Self, String> {
         let words: Vec<&str> = s.split_whitespace().collect();
-        if words.len() != 4 || words[0] != "rustc" {
+        if (words.len() != 2 && words.len() != 4) || words[0] != "rustc" {
             return Err(format!("unrecognised version string: {}", s));
         }
 
-        let commit = match words[2].strip_prefix('(') {
-            None => return Err(format!("unrecognised version string: {}", s)),
-            Some(s) => s.to_string(),
+        let commit = if words.len() == 4 {
+            match words[2].strip_prefix('(') {
+                None => return Err(format!("unrecognised version string: {}", s)),
+                Some(s) => s.to_string(),
+            }
+        } else {
+            "".to_string()
         };
-        let date = match words[3].strip_suffix(')') {
-            None => return Err(format!("unrecognised version string: {}", s)),
-            Some(s) => Date::parse(s)?,
+
+        let date = if words.len() == 4 {
+            match words[3].strip_suffix(')') {
+                None => return Err(format!("unrecognised version string: {}", s)),
+                Some(s) => Date::parse(s)?,
+            }
+        } else {
+            Date::parse("0-0-0")?
         };
 
         let spec: Vec<&str> = words[1].split('-').collect();
