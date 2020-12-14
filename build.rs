@@ -92,11 +92,12 @@ impl Version {
         let commit = if words.len() == 4 {
             match words[2].strip_prefix('(') {
                 None => return Err(format!("unrecognised version string: {}", s)),
-                Some(s) => s.to_string(),
+                Some(s) => s,
             }
         } else {
-            "".to_string()
-        };
+            ""
+        }
+        .to_string();
 
         let date = if words.len() == 4 {
             match words[3].strip_suffix(')') {
