@@ -59,10 +59,7 @@ fn rename(dir: &Option<String>, from: &str, to: &str) -> program::Result {
     let to = path::join(&dir, &to)?;
 
     if path::exists(&to) {
-        return Err(Box::new(io::Error::new(
-            io::ErrorKind::Other,
-            format!("file exists: {}", to),
-        )));
+        return Err(io::Error::new(io::ErrorKind::Other, format!("file exists: {}", to)).into());
     }
 
     fs::rename(&from, &to)?;
