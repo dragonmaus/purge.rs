@@ -38,7 +38,7 @@ cfg_if::cfg_if! {
     }
 }
 
-pub fn purge(path: &str) -> program::Result {
+pub fn purge(path: &str, verbosity: u8) -> program::Result {
     let attrs = fs::symlink_metadata(path).map_err(|e| format!("'{}': {}", path, e))?;
 
     let mut perms = attrs.permissions();
@@ -76,13 +76,13 @@ pub fn purge(path: &str) -> program::Result {
 
         for entry in entries {
             let entry = entry.map_err(|e| format!("'{}': {}", path, e))?;
-            purge(&entry.path().to_string_lossy())?;
+            purge(&entry.path().to_string_lossy(), verbosity)?;
         }
     } else if attrs.is_file() && hardlinks(&attrs) == 1 {
-        file::shred(path).map_err(|e| format!("'{}': {}", path, e))?;
+        file::shred(path, verbosity).map_err(|e| format!("'{}': {}", path, e))?;
     }
 
-    file::erase(path).map_err(|e| format!("'{}': {}", path, e))?;
+    file::erase(path, verbosity).map_err(|e| format!("'{}': {}", path, e))?;
 
     Ok(0)
 }

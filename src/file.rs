@@ -7,19 +7,19 @@ use std::{
 
 const SHRED_BUFFER_MAX: usize = 262_144;
 
-pub fn erase(path: &str) -> program::Result {
+pub fn erase(path: &str, verbosity: u8) -> program::Result {
     let (dir, mut oldname) = path::split(&path)?;
     let mut newname = String::from_utf8(oldname.as_bytes().iter().map(|_| b'0').collect())?;
 
     if newname != oldname {
-        rename(&dir, &oldname, &newname)?;
+        rename(&dir, &oldname, &newname, verbosity)?;
     }
 
     while newname != "0" {
         oldname = newname;
         newname = oldname.strip_suffix("0").unwrap().to_string();
 
-        rename(&dir, &oldname, &newname)?;
+        rename(&dir, &oldname, &newname, verbosity)?;
     }
 
     let newpath = path::join(&dir, &newname)?;
@@ -29,22 +29,28 @@ pub fn erase(path: &str) -> program::Result {
         fs::remove_file(newpath)?;
     }
 
-    log(&format!("{}: removed", path));
+    if verbosity > 0 {
+        log(&format!("{}: removed", path));
+    }
 
     Ok(0)
 }
 
-pub fn shred(path: &str) -> program::Result {
+pub fn shred(path: &str, verbosity: u8) -> program::Result {
     let size = fs::symlink_metadata(&path)?.len();
     let file = fs::OpenOptions::new().write(true).open(path)?;
 
     for pass in 1..=3 {
         let r = random::<u8>();
-        log(&format!("{}: pass {}/4 (random)...", path, pass));
+        if verbosity > 1 {
+            log(&format!("{}: pass {}/4 (random)...", path, pass));
+        }
         shred_with(r, &file, size)?;
     }
 
-    log(&format!("{}: pass 4/4 (000000)...", path));
+    if verbosity > 1 {
+        log(&format!("{}: pass 4/4 (000000)...", path));
+    }
     shred_with(0, &file, size)?;
 
     Ok(0)
@@ -54,7 +60,7 @@ fn log(msg: &str) {
     eprintln!("{}: {}", program::name("purge"), msg)
 }
 
-fn rename(dir: &Option<String>, from: &str, to: &str) -> program::Result {
+fn rename(dir: &Option<String>, from: &str, to: &str, verbosity: u8) -> program::Result {
     let from = path::join(&dir, &from)?;
     let to = path::join(&dir, &to)?;
 
@@ -64,7 +70,9 @@ fn rename(dir: &Option<String>, from: &str, to: &str) -> program::Result {
 
     fs::rename(&from, &to)?;
 
-    log(&format!("{}: renamed to {}", from, to));
+    if verbosity > 1 {
+        log(&format!("{}: renamed to {}", from, to));
+    }
 
     Ok(0)
 }
