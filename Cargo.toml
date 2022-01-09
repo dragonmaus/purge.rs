@@ -15,8 +15,10 @@ regex = "1"
 [dependencies]
 cfg-if = "1"
 getopt = "1"
-program = { git = "git://git.dragonma.us/rust/program" }
 rand = "0.8"
+
+[dependencies.program]
+git = "git://git.dragonma.us/rust/program"
 
 [features]
 windows_by_handle = []
