@@ -37,7 +37,7 @@ pub fn erase(path: &str, verbosity: u8) -> program::Result {
 }
 
 pub fn shred(path: &str, verbosity: u8) -> program::Result {
-    let size = fs::symlink_metadata(&path)?.len();
+    let size = fs::symlink_metadata(path)?.len();
     let file = fs::OpenOptions::new().write(true).open(path)?;
 
     for pass in 1..=3 {

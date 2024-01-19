@@ -26,11 +26,11 @@ fn program(name: &str) -> program::Result {
                     if verbosity < 2 {
                         verbosity += 1;
                     }
-                }
+                },
                 Opt('h', None) => {
                     print_usage(name);
                     return Ok(0);
-                }
+                },
                 _ => unreachable!(),
             },
         }

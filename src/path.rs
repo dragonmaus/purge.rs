@@ -20,7 +20,7 @@ pub fn split(path: &str) -> io::Result<(Option<String>, String)> {
                 io::ErrorKind::Other,
                 format!("bad path: '{}'", path.display()),
             ))
-        }
+        },
         Some(p) => p.to_string_lossy().into_owned(),
     };
 

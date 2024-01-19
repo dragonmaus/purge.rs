@@ -43,6 +43,7 @@ pub fn purge(path: &str, verbosity: u8) -> program::Result {
 
     let mut perms = attrs.permissions();
     if perms.readonly() {
+        #[allow(clippy::permissions_set_readonly_false)]
         perms.set_readonly(false);
         fs::set_permissions(path, perms).map_err(|e| format!("'{}': {}", path, e))?;
     }

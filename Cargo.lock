@@ -59,7 +59,7 @@ source = "git+git://git.dragonma.us/rust/program#45a5dab00f2020bc8ea22af230bd333
 
 [[package]]
 name = "purge"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
  "cfg-if",
  "getopt",

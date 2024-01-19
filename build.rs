@@ -76,7 +76,7 @@ struct Version {
 impl Version {
     fn read() -> Result<Self, String> {
         let rustc = env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
-        let output = Command::new(&rustc)
+        let output = Command::new(rustc)
             .arg("--version")
             .output()
             .unwrap()
@@ -151,7 +151,7 @@ impl PartialOrd for Version {
 fn read_num(s: &str) -> Result<u32, String> {
     let mut num = String::new();
     for c in s.chars() {
-        if !c.is_digit(10) {
+        if !c.is_ascii_digit() {
             break;
         }
         num.push(c);

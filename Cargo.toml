@@ -1,6 +1,6 @@
 [package]
 name = "purge"
-version = "1.0.3"
+version = "1.0.4"
 authors = ["David Wildasin <dragonmaus@posteo.net>"]
 edition = "2021"
 description = "Recursively shred files and directories"
