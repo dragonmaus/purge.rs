@@ -1,3 +1,5 @@
+extern crate regex;
+
 use regex::Regex;
 use std::{cmp::Ordering, env, ffi::OsString, fs::File, io::Write, path::Path, process::Command};
 

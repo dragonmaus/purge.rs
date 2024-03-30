@@ -1,8 +1,9 @@
 [package]
 name = "purge"
-version = "1.0.4"
+version = "1.0.5"
 authors = ["David Wildasin <dragonmaus@posteo.net>"]
 edition = "2021"
+rust-version = "1.65.0"
 description = "Recursively shred files and directories"
 repository = "https://git.dragonma.us/rust/purge"
 license = "BSD-3-Clause-Clear"
@@ -16,7 +17,6 @@ regex = "1"
 cfg-if = "1"
 getopt = "1"
 rand = "0.8"
-
 [dependencies.program]
 git = "git://git.dragonma.us/rust/program"
 

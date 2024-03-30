@@ -1,3 +1,5 @@
+extern crate getopt;
+
 use getopt::Opt;
 
 program::main!("purge");

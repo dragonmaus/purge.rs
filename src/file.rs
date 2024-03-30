@@ -1,5 +1,7 @@
+extern crate rand;
+
+use self::rand::random;
 use crate::path;
-use rand::random;
 use std::{
     fs::{self, File},
     io::{self, Seek, SeekFrom, Write},
